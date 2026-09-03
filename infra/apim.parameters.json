@@ -1,0 +1,20 @@
+{
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "apimName": {
+      "value": "${APIM_NAME}"
+    },
+    "publisherEmail": {
+      "value": "${APIM_PUBLISHER_EMAIL}"
+    },
+    "publisherName": {
+      "value": "${APIM_PUBLISHER_NAME}"
+    },
+    "foundryAccountName": {
+      "value": "${AZURE_AI_ACCOUNT_NAME}"
+    },
+    "foundryProjectName": {
+      "value": "${AZURE_AI_PROJECT_NAME}"
+    }
+  }
+}

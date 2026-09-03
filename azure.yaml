@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+requiredVersions:
+    extensions:
+        azure.ai.toolboxes: ">=1.0.0-beta.5"
+name: apim-toolbox-oauth
+services:
+    project:
+        host: azure.ai.project
+    tools:
+        host: azure.ai.toolbox
+        uses:
+            - project
+        description: Microsoft Learn MCP exposed through an OAuth-protected APIM gateway.
+        tools:
+            - name: microsoftlearn
+              require_approval: always
+              server_label: microsoftlearn
+              server_url: https://learn.microsoft.com/api/mcp
+              type: mcp
+infra:
+    layers:
+        - provider: microsoft.foundry
+          path: infra/foundry
+          name: foundry
+        - provider: bicep
+          path: infra
+          module: apim
+          name: apim
+          dependsOn:
+              - foundry

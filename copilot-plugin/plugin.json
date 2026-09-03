@@ -1,0 +1,6 @@
+{
+  "name": "foundry-toolbox",
+  "description": "Connect GitHub Copilot CLI to a Microsoft Foundry toolbox through API Management.",
+  "version": "1.0.0",
+  "mcpServers": ".mcp.json"
+}

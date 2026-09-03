@@ -1,0 +1,43 @@
+<policies>
+  <inbound>
+    <return-response>
+      <set-status code="200" reason="OK" />
+      <set-header name="Content-Type" exists-action="override">
+        <value>application/json</value>
+      </set-header>
+      <set-body>@{
+        return Newtonsoft.Json.JsonConvert.SerializeObject(new {
+          issuer = "__APIM_ORIGIN__",
+          authorization_endpoint = "https://login.microsoftonline.com/__TENANT_ID__/oauth2/v2.0/authorize",
+          token_endpoint = "https://login.microsoftonline.com/__TENANT_ID__/oauth2/v2.0/token",
+          response_types_supported = new[] {
+            "code"
+          },
+          grant_types_supported = new[] {
+            "authorization_code",
+            "refresh_token"
+          },
+          token_endpoint_auth_methods_supported = new[] {
+            "none"
+          },
+          code_challenge_methods_supported = new[] {
+            "S256"
+          },
+          scopes_supported = new[] {
+            "__MCP_SCOPE__",
+            "offline_access"
+          }
+        });
+      }</set-body>
+    </return-response>
+  </inbound>
+  <backend>
+    <base />
+  </backend>
+  <outbound>
+    <base />
+  </outbound>
+  <on-error>
+    <base />
+  </on-error>
+</policies>

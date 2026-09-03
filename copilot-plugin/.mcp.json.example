@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "foundry-toolbox": {
+      "type": "http",
+      "url": "<APIM_TOOLBOX_MCP_URL>",
+      "oauthClientId": "<MCP_COPILOT_CLIENT_ID>",
+      "auth": {
+        "redirectPort": 33418
+      },
+      "tools": [
+        "*"
+      ]
+    }
+  }
+}

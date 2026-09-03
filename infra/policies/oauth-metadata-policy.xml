@@ -1,0 +1,30 @@
+<policies>
+  <inbound>
+    <return-response>
+      <set-status code="200" reason="OK" />
+      <set-header name="Content-Type" exists-action="override">
+        <value>application/json</value>
+      </set-header>
+      <set-body>@{
+        return Newtonsoft.Json.JsonConvert.SerializeObject(new {
+          resource = "__MCP_URL__",
+          authorization_servers = new[] {
+            "__APIM_ORIGIN__"
+          },
+          scopes_supported = new[] {
+            "__MCP_SCOPE__"
+          }
+        });
+      }</set-body>
+    </return-response>
+  </inbound>
+  <backend>
+    <base />
+  </backend>
+  <outbound>
+    <base />
+  </outbound>
+  <on-error>
+    <base />
+  </on-error>
+</policies>
