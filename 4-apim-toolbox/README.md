@@ -2,7 +2,7 @@
 
 This sample deploys a Microsoft Foundry project and toolbox, then exposes the
 toolbox through an OAuth-protected Azure API Management (APIM) endpoint. It
-configures the Microsoft Learn MCP server as the toolbox tool.
+configures both Microsoft Learn and GitHub MCP servers as toolbox tools.
 
 It does **not** deploy an agent or a model.
 
@@ -10,7 +10,7 @@ It does **not** deploy an agent or a model.
 GitHub Copilot CLI or VS Code
   -> APIM (user sign-in and token validation)
   -> Microsoft Foundry toolbox (user identity and Foundry RBAC)
-  -> Microsoft Learn MCP
+  -> Microsoft Learn MCP or GitHub MCP
 ```
 
 > [!IMPORTANT]
@@ -33,6 +33,7 @@ You also need:
 - Microsoft Entra permission to create an application, service principal,
   federated credential, and tenant-wide delegated permission grants
 - The **Foundry User** role on the deployed project for every toolbox user
+- A GitHub account for the one-time GitHub connector consent
 
 If you cannot grant the Entra permissions, ask a tenant administrator to run
 the deployment.
@@ -43,6 +44,7 @@ Run these commands from the `4-apim-toolbox` directory:
 
 ```powershell
 azd extension install azure.ai.projects
+azd extension install azure.ai.connections
 azd extension install azure.ai.toolboxes
 ```
 
@@ -67,10 +69,26 @@ azd env set APIM_PUBLISHER_NAME '<your-organization-name>'
 `APIM_NAME` must be globally unique because it becomes part of the public
 gateway hostname.
 
-## 3. Deploy
+## 3. Provision Azure resources
 
 ```powershell
-azd up --no-prompt
+azd provision --no-prompt
+```
+
+## 4. Configure the GitHub toolbox connection
+
+Create the Foundry-managed GitHub OAuth connection:
+
+```powershell
+.\scripts\setup-github-connection.ps1
+```
+
+No GitHub client ID, client secret, or personal access token is required.
+
+Deploy the toolbox with both Microsoft Learn and GitHub:
+
+```powershell
+azd deploy --no-prompt
 ```
 
 After deployment, print and copy the values needed by either client:
@@ -80,7 +98,7 @@ azd env get-value APIM_TOOLBOX_MCP_URL
 azd env get-value MCP_COPILOT_CLIENT_ID
 ```
 
-## 4. Connect a client
+## 5. Connect a client
 
 ### Visual Studio Code
 
@@ -145,6 +163,13 @@ In Copilot CLI, authenticate the server:
 Complete the browser sign-in. The `foundry-toolbox` tools will then be
 available, and Copilot will request approval before each tool call.
 
+### Authorize GitHub once
+
+The first toolbox request from each user returns a JSON-RPC `-32006` error with
+`CONSENT_REQUIRED` and a GitHub consent URL. Open that URL, authorize GitHub,
+then restart `foundry-toolbox`. Foundry stores and refreshes the user's GitHub
+token; APIM remains the only MCP server configured in the client.
+
 > [!NOTE]
 > GitHub Copilot app project sessions currently do not load user-installed
 > plugin MCP definitions or repository `.mcp.json` files. Use Copilot CLI or
@@ -154,9 +179,10 @@ available, and Copilot will request approval before each tool call.
 
 | Problem | Resolution |
 |---|---|
-| `azd up` fails while creating Microsoft Graph resources | Run the deployment with an account that can create Entra applications and grant delegated permissions. |
-| APIM creation reports that the name is unavailable | Set a different globally unique value with `azd env set APIM_NAME '<new-name>'`, then run `azd up` again. |
+| `azd provision` fails while creating Microsoft Graph resources | Run the deployment with an account that can create Entra applications and grant delegated permissions. |
+| APIM creation reports that the name is unavailable | Set a different globally unique value with `azd env set APIM_NAME '<new-name>'`, then run `azd provision` again. |
 | Sign-in succeeds but a toolbox call returns `403` | Assign the signed-in user the **Foundry User** role on the deployed Foundry project. |
+| GitHub returns `CONSENT_REQUIRED` | Open the consent URL in the MCP output, authorize GitHub, and restart the MCP server. |
 | Copilot CLI does not discover the server | Start it from the `4-apim-toolbox` directory with `copilot --plugin-dir .\copilot-plugin` and confirm that `copilot-plugin\.mcp.json` exists. |
 
 ## Cleanup

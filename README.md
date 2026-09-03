@@ -143,7 +143,7 @@ APIM gateway in front of the Foundry toolbox.
 
 The deployable sample is in [`4-apim-toolbox/`](4-apim-toolbox/). It provisions:
 
-- A Microsoft Foundry project and toolbox
+- A Microsoft Foundry project and toolbox containing Microsoft Learn and GitHub
 - An APIM Basic v2 gateway
 - OAuth metadata and token validation policies
 - A Microsoft Entra application for browser authentication and on-behalf-of
@@ -178,6 +178,11 @@ Then:
 1. Run **MCP: List Servers**.
 2. Start `foundry-toolbox`.
 3. Complete the browser sign-in.
+
+Both Microsoft Learn and GitHub tools are discovered through this single APIM
+server. The first GitHub use returns a one-time `CONSENT_REQUIRED` message in
+the MCP output. Open its consent URL, authorize GitHub, and restart
+`foundry-toolbox`.
 
 ## 5. VS Code with an authentication extension
 
@@ -245,7 +250,8 @@ this MCP server so the command obtains a refreshed token.
 | `403` | Assign **Foundry User** on the Foundry project. |
 | Token expired | Get a new token and restart the manual-token server. |
 | `State does not match` | Restart the MCP server and complete browser sign-in again. |
-| APIM metadata is `404` | Run `azd up` again from the `4-apim-toolbox` directory. |
+| APIM metadata is `404` | Repeat the provision and deploy steps in `4-apim-toolbox/README.md`. |
+| GitHub returns `CONSENT_REQUIRED` | Open the consent URL from the MCP output, authorize GitHub, and restart `foundry-toolbox`. |
 
 ## Current Microsoft documentation
 
