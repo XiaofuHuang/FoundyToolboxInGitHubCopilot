@@ -193,12 +193,9 @@ Open the MCP panel, start `foundry-toolbox`, and complete the browser sign-in.
 
 ### GitHub Copilot CLI
 
-Copy `samples\copilot-plugin\.mcp.json.example` to
-`samples\copilot-plugin\.mcp.json`. The repository already includes the
-required `samples\copilot-plugin\plugin.json`.
-
-Edit `samples\copilot-plugin\.mcp.json` and replace both placeholders with the
-values printed after deployment:
+The repository includes `samples\copilot-plugin\plugin.json` and
+`samples\copilot-plugin\.mcp.json`. Edit `.mcp.json` and replace both
+placeholders with the values printed after deployment:
 
 ```json
 {

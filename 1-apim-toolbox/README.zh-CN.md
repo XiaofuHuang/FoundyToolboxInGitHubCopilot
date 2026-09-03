@@ -189,11 +189,9 @@ azd env get-value MCP_COPILOT_CLIENT_ID
 
 ### GitHub Copilot CLI
 
-将 `samples\copilot-plugin\.mcp.json.example` 复制为
-`samples\copilot-plugin\.mcp.json`。仓库已包含所需的
-`samples\copilot-plugin\plugin.json`。
-
-编辑 `samples\copilot-plugin\.mcp.json`，使用部署后输出的值替换两个占位符：
+仓库已包含 `samples\copilot-plugin\plugin.json` 和
+`samples\copilot-plugin\.mcp.json`。编辑 `.mcp.json`，使用部署后输出的值
+替换两个占位符：
 
 ```json
 {
