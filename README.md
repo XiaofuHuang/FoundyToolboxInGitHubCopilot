@@ -1,81 +1,165 @@
-# APIM-fronted Foundry toolbox
+# Simple guide: connect to a Microsoft Foundry Toolbox
 
-This sample exposes a Microsoft Foundry toolbox through Azure API Management
-(APIM). It contains no agent or model deployment.
+This guide uses the shortest working commands for:
 
-## Request flow
+1. Azure CLI
+2. REST with a bearer token
+3. VS Code with a manually pasted token
+4. VS Code through the APIM OAuth gateway
+5. VS Code with a small authentication extension
 
-```text
-MCP client
-  -> OAuth token for the APIM MCP endpoint
-  -> APIM validates the user
-  -> APIM exchanges the token for a Foundry user token through OBO
-  -> APIM relays the MCP request to Toolbox
-```
+The examples use PowerShell 7 on Windows.
 
-Toolbox receives the user's Entra identity and applies that user's Foundry RBAC.
+The repository includes all three VS Code configurations from methods 3-5 in
+`.vscode\mcp.json.example`. Copy it to `.vscode\mcp.json`, replace the
+placeholders, and then start a server. The local `mcp.json` is ignored by Git.
 
-One mixed-mode Entra application supplies the public client ID, represents the
-APIM MCP resource, and performs OBO through APIM's federated managed identity.
-No client secret is created.
+## Before you start
 
-## Resources
+You need:
 
-| Path | Purpose |
-|---|---|
-| `azure.yaml` | Creates the Foundry project/toolbox and orders infrastructure deployment. |
-| `infra/apim.bicep` | Creates APIM and the mixed-mode Entra application. |
-| `infra/modules/gateway.bicep` | Creates the APIM MCP API and OAuth metadata endpoints. |
-| `infra/policies/` | Validates the APIM token, performs OBO, and relays MCP requests. |
-| `copilot-plugin/` | Contains the Copilot CLI plugin and MCP configuration example. |
-| `scripts/cleanup-entra.ps1` | Removes the tenant-level Entra app before `azd down`. |
+- A published Toolbox MCP endpoint for methods 1-3 and 5.
+- Azure CLI signed in to the correct tenant.
+- The **Foundry User** role on the Foundry project.
 
-## Deploy
+Method 4 can create the Foundry project and toolbox for you. See the additional
+prerequisites in [`4-apim-toolbox/README.md`](4-apim-toolbox/README.md).
 
-Each caller needs **Foundry User** on the project. The deployer needs permission
-to create an Entra application, service principal, federated credential, and
-delegated permission grants.
+The current role name is **Foundry User**. It was previously named
+**Azure AI User**.
+
+Do not confuse the role with the OAuth scope:
+
+- OAuth token scope: `https://ai.azure.com/.default`
+- Azure RBAC role: **Foundry User**
+
+No `Foundry-Features` header is required.
+
+Set your endpoint:
 
 ```powershell
-az login
-azd auth login
-
-azd env new '<environment-name>' `
-  --subscription '<subscription-id>' `
-  --location eastus2
-
-azd env set AZURE_RESOURCE_GROUP '<resource-group>'
-azd env set APIM_NAME '<globally-unique-apim-name>'
-azd env set APIM_PUBLISHER_EMAIL 'you@example.com'
-azd env set APIM_PUBLISHER_NAME 'Your organization'
-
-azd up --no-prompt
+$toolboxUrl = 'https://<account>.services.ai.azure.com/api/projects/<project>/toolboxes/<toolbox>/mcp?api-version=v1'
 ```
 
-Read the client configuration:
+## 1. Simplest Azure CLI test
+
+Sign in:
+
+```powershell
+az login --tenant '<tenant-id>'
+```
+
+Call `tools/list`:
+
+```powershell
+$body = '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
+
+az rest `
+  --method post `
+  --resource https://ai.azure.com `
+  --url $toolboxUrl `
+  --headers 'Content-Type=application/json' 'MCP-Protocol-Version=2025-11-25' `
+  --body $body
+```
+
+`az rest` gets the Entra token for you. A successful response contains
+`result.tools`.
+
+## 2. Simplest REST test
+
+Get a token from your Azure CLI login:
+
+```powershell
+$token = az account get-access-token `
+  --scope https://ai.azure.com/.default `
+  --query accessToken `
+  --output tsv
+```
+
+Call the Toolbox with `curl.exe`:
+
+```powershell
+$body = '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
+
+curl.exe -sS -X POST $toolboxUrl `
+  -H "Authorization: Bearer $token" `
+  -H 'Content-Type: application/json' `
+  -H 'MCP-Protocol-Version=2025-11-25' `
+  --data $body
+```
+
+The token normally expires in about one hour. Do not print, save, commit, or
+share it.
+
+## 3. VS Code with a manually pasted token
+
+Get a token and copy it:
+
+```powershell
+$token = az account get-access-token `
+  --scope https://ai.azure.com/.default `
+  --query accessToken `
+  --output tsv
+
+Set-Clipboard $token
+```
+
+The `toolbox-manual-token` entry in `.vscode\mcp.json` uses this configuration:
+
+```jsonc
+{
+  "inputs": [
+    {
+      "id": "toolboxToken",
+      "type": "promptString",
+      "description": "Foundry Toolbox access token",
+      "password": true
+    }
+  ],
+  "servers": {
+    "toolbox-manual-token": {
+      "type": "http",
+      "url": "https://<account>.services.ai.azure.com/api/projects/<project>/toolboxes/<toolbox>/mcp?api-version=v1",
+      "headers": {
+        "Authorization": "Bearer ${input:toolboxToken}"
+      }
+    }
+  }
+}
+```
+
+In VS Code:
+
+1. Run **MCP: List Servers**.
+2. Start `toolbox-manual-token`.
+3. Paste only the token, without the `Bearer` prefix.
+
+When the token expires, get a new token and restart the server.
+
+## 4. VS Code through APIM
+
+Use this method when you want browser sign-in, automatic token refresh, and an
+APIM gateway in front of the Foundry toolbox.
+
+The deployable sample is in [`4-apim-toolbox/`](4-apim-toolbox/). It provisions:
+
+- A Microsoft Foundry project and toolbox
+- An APIM Basic v2 gateway
+- OAuth metadata and token validation policies
+- A Microsoft Entra application for browser authentication and on-behalf-of
+  token exchange
+
+Follow [`4-apim-toolbox/README.md`](4-apim-toolbox/README.md) to deploy the sample
+and obtain these values:
 
 ```powershell
 azd env get-value APIM_TOOLBOX_MCP_URL
 azd env get-value MCP_COPILOT_CLIENT_ID
 ```
 
-## OAuth metadata
+In the `foundry-toolbox` entry in `.vscode\mcp.json`, replace both placeholders:
 
-APIM publishes:
-
-- `authorization_endpoint`: Entra browser login;
-- `token_endpoint`: Entra token and refresh endpoint;
-- `grant_types_supported`: `authorization_code` and `refresh_token`;
-- protected-resource scope: APIM `user_impersonate`;
-- authorization-server scopes: `user_impersonate` and `offline_access`.
-
-OAuth refresh uses the token endpoint with `grant_type=refresh_token`.
-
-## Visual Studio Code
-
-Create a local `.vscode/mcp.json`:
-
-```json
+```jsonc
 {
   "servers": {
     "foundry-toolbox": {
@@ -89,45 +173,82 @@ Create a local `.vscode/mcp.json`:
 }
 ```
 
-Start `foundry-toolbox` from the MCP panel and complete authentication.
+Then:
 
-## GitHub Copilot CLI
+1. Run **MCP: List Servers**.
+2. Start `foundry-toolbox`.
+3. Complete the browser sign-in.
 
-Copy `copilot-plugin/.mcp.json.example` to `copilot-plugin/.mcp.json`, replace
-the placeholders, then run:
+## 5. VS Code with an authentication extension
 
-```powershell
-$env:COPILOT_ENTRA_DISABLE_ONEAUTH = '1'
-copilot --plugin-dir .\copilot-plugin
+The extension source is in [`5-vscode-extension/`](5-vscode-extension/).
+
+This method depends on the **Azure Resources** VS Code extension. It reuses the
+account from **Azure: Sign In** and returns a Foundry access token to
+`mcp.json`. No separate Entra app registration is needed.
+
+Install Azure Resources, run **Azure: Sign In**, and optionally set the tenant
+when your account uses multiple tenants:
+
+```jsonc
+{
+  "foundryToolboxAuth.tenantId": "<tenant-id>"
+}
 ```
 
-Authenticate with `/mcp auth foundry-toolbox`.
-
-## GitHub Copilot app limitation
-
-Copilot app project sessions currently don't load user-installed plugin MCP
-definitions or repository `.mcp.json` definitions. Authentication and tool
-discovery therefore don't start in the app.
-
-## Gateway behavior
-
-The APIM policy:
-
-1. Validates the APIM `user_impersonate` token.
-2. Returns `405` for the optional Streamable HTTP GET backchannel.
-3. Exchanges the user token for `https://ai.azure.com/.default` through OBO.
-4. Relays MCP POST requests to Toolbox with `api-version=v1`.
-
-## Security tradeoff
-
-Because the same app is both public client and confidential OBO client, its
-public flow can also request the delegated Foundry scope directly. Use separate
-public-client and resource app registrations when APIM must be an enforced
-governance boundary.
-
-## Cleanup
+### Package and install the extension
 
 ```powershell
-.\scripts\cleanup-entra.ps1
-azd down
+cd .\5-vscode-extension
+npm ci
+npm run package
+code --install-extension .\foundry-toolbox-auth-0.0.2.vsix --force
 ```
+
+Reload VS Code, then run **Foundry Toolbox: Sign In**.
+
+### Connect the Toolbox
+
+The `toolbox-extension-auth` entry in `.vscode\mcp.json` uses this configuration:
+
+```jsonc
+{
+  "inputs": [
+    {
+      "id": "toolboxExtensionToken",
+      "type": "command",
+      "command": "foundryToolboxAuth.getAccessToken"
+    }
+  ],
+  "servers": {
+    "toolbox-extension-auth": {
+      "type": "http",
+      "url": "https://<account>.services.ai.azure.com/api/projects/<project>/toolboxes/<toolbox>/mcp?api-version=v1",
+      "headers": {
+        "Authorization": "Bearer ${input:toolboxExtensionToken}"
+      }
+    }
+  }
+}
+```
+
+Run **MCP: List Servers** and start `toolbox-extension-auth`. VS Code reuses
+its Microsoft authentication session; no Azure CLI token or manual token paste
+is needed. If the access token expires while the server is running, restart
+this MCP server so the command obtains a refreshed token.
+
+## Common errors
+
+| Error | Fix |
+|---|---|
+| `401` | Sign in again and request the `https://ai.azure.com/.default` scope. |
+| `403` | Assign **Foundry User** on the Foundry project. |
+| Token expired | Get a new token and restart the manual-token server. |
+| `State does not match` | Restart the MCP server and complete browser sign-in again. |
+| APIM metadata is `404` | Run `azd up` again from the `4-apim-toolbox` directory. |
+
+## Current Microsoft documentation
+
+- [Create and manage a toolbox](https://learn.microsoft.com/azure/foundry/agents/how-to/tools/toolbox)
+- [Foundry authentication and authorization](https://learn.microsoft.com/azure/foundry/concepts/authentication-authorization-foundry)
+- [Foundry role-based access control](https://learn.microsoft.com/azure/foundry/concepts/rbac-foundry)

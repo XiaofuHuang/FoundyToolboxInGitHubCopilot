@@ -1,0 +1,60 @@
+{
+  "name": "foundry-toolbox-auth",
+  "displayName": "Foundry Toolbox Authentication",
+  "description": "Uses the Azure Resources sign-in to get a Microsoft Entra token for a Foundry Toolbox MCP server.",
+  "version": "0.0.2",
+  "publisher": "xiaofhua-local",
+  "private": true,
+  "engines": {
+    "vscode": "^1.136.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:foundryToolboxAuth.getAccessToken",
+    "onCommand:foundryToolboxAuth.signIn"
+  ],
+  "main": "./dist/extension.js",
+  "files": [
+    "dist/extension.js",
+    "README.md"
+  ],
+  "extensionDependencies": [
+    "ms-azuretools.vscode-azureresourcegroups"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "foundryToolboxAuth.signIn",
+        "title": "Foundry Toolbox: Sign In"
+      },
+      {
+        "command": "foundryToolboxAuth.getAccessToken",
+        "title": "Foundry Toolbox: Get Access Token",
+        "enablement": "false"
+      }
+    ],
+    "configuration": {
+      "title": "Foundry Toolbox Authentication",
+      "properties": {
+        "foundryToolboxAuth.tenantId": {
+          "type": "string",
+          "default": "",
+          "scope": "resource",
+          "description": "Microsoft Entra tenant ID that owns the Foundry project."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "esbuild extension.js --bundle --platform=node --format=cjs --external:vscode --outfile=dist/extension.js",
+    "package": "npm run build && npx @vscode/vsce package --allow-missing-repository --skip-license"
+  },
+  "dependencies": {
+    "@microsoft/vscode-azext-azureauth": "^5.1.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  }
+}
