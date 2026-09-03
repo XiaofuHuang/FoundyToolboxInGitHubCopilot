@@ -1,0 +1,21 @@
+{
+  "inputs": [
+    {
+      "id": "toolboxExtensionTokenV2",
+      "type": "command",
+      "command": "foundryToolboxAuth.getAccessToken",
+      "args": {
+        "toolboxUrl": "<FOUNDRY_TOOLBOX_MCP_URL>"
+      }
+    }
+  ],
+  "servers": {
+    "toolbox-extension-auth": {
+      "type": "http",
+      "url": "<FOUNDRY_TOOLBOX_MCP_URL>",
+      "headers": {
+        "Authorization": "Bearer ${input:toolboxExtensionTokenV2}"
+      }
+    }
+  }
+}

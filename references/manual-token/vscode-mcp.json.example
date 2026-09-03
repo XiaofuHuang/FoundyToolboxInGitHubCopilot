@@ -1,0 +1,19 @@
+{
+  "inputs": [
+    {
+      "id": "toolboxToken",
+      "type": "promptString",
+      "description": "Foundry Toolbox access token",
+      "password": true
+    }
+  ],
+  "servers": {
+    "foundry-toolbox-manual-token": {
+      "type": "http",
+      "url": "<FOUNDRY_TOOLBOX_MCP_URL>",
+      "headers": {
+        "Authorization": "Bearer ${input:toolboxToken}"
+      }
+    }
+  }
+}

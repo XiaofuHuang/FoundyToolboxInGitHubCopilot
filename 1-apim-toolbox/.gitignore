@@ -1,5 +1,5 @@
 .azure/
 .mcp.json
 .vscode/mcp.json
-copilot-plugin/.mcp.json
+samples/copilot-plugin/.mcp.json
 infra/validation-*.bicepparam

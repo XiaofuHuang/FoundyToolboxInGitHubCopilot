@@ -1,0 +1,11 @@
+{
+  "servers": {
+    "foundry-toolbox": {
+      "type": "http",
+      "url": "<APIM_TOOLBOX_MCP_URL>",
+      "oauth": {
+        "clientId": "<MCP_COPILOT_CLIENT_ID>"
+      }
+    }
+  }
+}

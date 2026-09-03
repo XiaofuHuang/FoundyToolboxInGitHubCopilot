@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "foundry-toolbox-manual-token": {
+      "type": "http",
+      "url": "<FOUNDRY_TOOLBOX_MCP_URL>",
+      "headers": {
+        "Authorization": "Bearer ${FOUNDRY_TOOLBOX_TOKEN}"
+      },
+      "tools": [
+        "*"
+      ]
+    }
+  }
+}

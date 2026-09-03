@@ -1,0 +1,6 @@
+{
+  "name": "foundry-toolbox-manual-token",
+  "description": "Connect GitHub Copilot CLI directly to a Microsoft Foundry Toolbox with a manually acquired token.",
+  "version": "1.0.0",
+  "mcpServers": ".mcp.json"
+}

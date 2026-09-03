@@ -19,7 +19,7 @@ services:
               server_label: microsoftlearn
               server_url: https://learn.microsoft.com/api/mcp
               type: mcp
-            - project_connection_id: github-mcp-managed
+            - project_connection_id: github-oauth
               require_approval: always
               server_label: github
               type: mcp

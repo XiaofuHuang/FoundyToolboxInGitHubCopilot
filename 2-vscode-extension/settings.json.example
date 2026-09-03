@@ -1,0 +1,5 @@
+{
+  // Optional fallback for running "Foundry Toolbox: Sign In" manually.
+  "foundryToolboxAuth.toolboxUrl": "https://<account>.services.ai.azure.com/api/projects/<project>/toolboxes/<toolbox>/mcp?api-version=v1",
+  "foundryToolboxAuth.tenantId": "<optional-tenant-id>"
+}
