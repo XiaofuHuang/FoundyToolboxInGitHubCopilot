@@ -34,6 +34,34 @@ code --install-extension .\foundry-toolbox-auth-0.0.5.vsix --force
 
 重新加载 VS Code。如果尚未安装 Azure Resources，请先安装它。
 
+## 使用 F5 调试扩展
+
+无需打包和安装 VSIX，也可以直接调试：将 `2-vscode-extension` 目录本身作为
+VS Code 工作区文件夹打开，然后在终端中运行 `npm ci`。请在用于调试的
+VS Code 实例中安装 **Azure Resources**。
+
+在 `extension.js` 或 `toolboxClient.js` 中设置断点，按 **F5**，如果出现提示，
+选择 **Run Foundry Toolbox Extension**。启动前任务会运行类型检查并生成包含
+源映射的扩展包，然后打开 **Extension Development Host** 窗口，加载此文件夹
+和开发中的扩展。
+
+在开发窗口中运行 **Foundry Toolbox: Sign In** 以激活扩展。如需调试 Toolbox
+预检，请参考 `settings.json.example` 配置 `foundryToolboxAuth.toolboxUrl`；
+也可以按照下文配置并启动 MCP 服务器。在原窗口中查看变量和 **Debug Console**。
+修改源代码后，请重新启动调试，以重新构建并加载更新后的扩展。
+
+### 身份验证诊断日志
+
+在运行扩展的窗口中打开 **View > Output**，选择
+**Foundry Toolbox Authentication**。运行 **Foundry Toolbox: Sign In**，
+或清除已保存的 MCP 令牌输入并重启 MCP 服务器，以重现问题。
+
+每次命令调用都有编号前缀。日志会区分 Azure 令牌获取和 Toolbox 预检阶段，
+记录不含凭据和查询参数的终结点、HTTP 状态和耗时，并包含错误堆栈及嵌套
+`cause`/聚合错误代码，例如 `ENOTFOUND` 或
+`UNABLE_TO_VERIFY_LEAF_SIGNATURE`。不会记录令牌、请求头、响应正文或授权
+URL。分享日志前，请检查其中是否包含与你的环境有关的信息。
+
 ## 2. 配置 `mcp.json`
 
 将 `samples\vscode\mcp.json.example` 复制到工作区的

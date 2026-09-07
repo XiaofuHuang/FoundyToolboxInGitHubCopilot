@@ -35,6 +35,40 @@ code --install-extension .\foundry-toolbox-auth-0.0.5.vsix --force
 
 Reload VS Code and install Azure Resources if it is not already installed.
 
+## Debug the extension with F5
+
+As an alternative to packaging and installing a VSIX, open `2-vscode-extension`
+itself as the VS Code workspace folder, then run `npm ci` in its terminal.
+Install **Azure Resources** in the VS Code instance used for debugging.
+
+Set breakpoints in `extension.js` or `toolboxClient.js`, then press **F5** and
+select **Run Foundry Toolbox Extension** if prompted. The pre-launch task runs
+the type check and bundles the extension with source maps, then opens an
+**Extension Development Host** window with this folder and the development
+extension loaded.
+
+In the development window, run **Foundry Toolbox: Sign In** to activate the
+extension. To debug the Toolbox preflight, configure
+`foundryToolboxAuth.toolboxUrl` using `settings.json.example`. Alternatively,
+configure and start the MCP server as described below. Inspect variables and
+the **Debug Console** in the original window. Restart debugging after source
+changes to rebuild and load the updated extension.
+
+### Authentication diagnostic logs
+
+In the window running the extension, open **View > Output** and select
+**Foundry Toolbox Authentication**. Reproduce the failure with **Foundry
+Toolbox: Sign In** or by clearing the saved MCP token input and restarting
+the MCP server.
+
+Each command invocation has a numbered prefix. Logs distinguish Azure token
+acquisition from Toolbox preflight, report the endpoint without credentials
+or query parameters, HTTP status and timing, and include error stacks with
+nested `cause`/aggregate error codes such as `ENOTFOUND` or
+`UNABLE_TO_VERIFY_LEAF_SIGNATURE`. Tokens, request headers, response bodies,
+and consent URLs are not logged. Review logs for environment-specific details
+before sharing them.
+
 ## 2. Configure `mcp.json`
 
 Copy `samples\vscode\mcp.json.example` to `.vscode\mcp.json` in your workspace.

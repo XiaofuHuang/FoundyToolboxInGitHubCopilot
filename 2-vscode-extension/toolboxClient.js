@@ -17,8 +17,12 @@ function getToolboxUrlArgument(argument) {
  * @param {string} toolboxUrl
  * @param {string} accessToken
  * @param {typeof fetch} [fetchImpl]
+ * @param {(message: string) => void} [log]
  */
-async function getToolboxConsentUrl(toolboxUrl, accessToken, fetchImpl = fetch) {
+async function getToolboxConsentUrl(toolboxUrl, accessToken, fetchImpl = fetch, log) {
+  const endpoint = new URL(toolboxUrl);
+  log?.(`Toolbox preflight: POST ${endpoint.origin}${endpoint.pathname} (credentials, query and fragment omitted).`);
+  const started = Date.now();
   const response = await fetchImpl(toolboxUrl, {
     method: 'POST',
     headers: {
@@ -35,11 +39,14 @@ async function getToolboxConsentUrl(toolboxUrl, accessToken, fetchImpl = fetch) 
     })
   });
 
+  log?.(`Toolbox preflight: HTTP ${response.status} received in ${Date.now() - started} ms.`);
   if (!response.ok) {
     throw new Error(`Foundry Toolbox tools/list returned HTTP ${response.status}.`);
   }
 
+  log?.('Toolbox preflight: reading the JSON response (body not logged).');
   const payload = await response.json();
+  log?.('Toolbox preflight: JSON response read; checking for consent requirements.');
   const message =
     payload &&
     typeof payload === 'object' &&

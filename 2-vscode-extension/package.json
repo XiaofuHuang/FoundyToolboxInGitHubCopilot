@@ -64,6 +64,7 @@
   "scripts": {
     "check": "tsc -p .",
     "build": "npm run check && esbuild extension.js --bundle --platform=node --format=cjs --external:vscode --outfile=dist/extension.js",
+    "build:debug": "npm run build -- --sourcemap",
     "package": "npm run build && npx @vscode/vsce package --allow-missing-repository --skip-license"
   },
   "dependencies": {
