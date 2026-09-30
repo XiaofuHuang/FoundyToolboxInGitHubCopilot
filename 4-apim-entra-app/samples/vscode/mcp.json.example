@@ -1,0 +1,19 @@
+{
+  "inputs": [
+    {
+      "id": "foundryToolboxEntraAppKey",
+      "type": "promptString",
+      "description": "APIM subscription key for the Entra-app gateway (not the app client secret)",
+      "password": true
+    }
+  ],
+  "servers": {
+    "foundry-toolbox-entra-app": {
+      "type": "http",
+      "url": "<APIM_TOOLBOX_MCP_URL>",
+      "headers": {
+        "Ocp-Apim-Subscription-Key": "${input:foundryToolboxEntraAppKey}"
+      }
+    }
+  }
+}

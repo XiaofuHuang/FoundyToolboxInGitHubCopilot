@@ -1,0 +1,61 @@
+<policies>
+  <inbound>
+    <base />
+    <set-header name="Ocp-Apim-Subscription-Key" exists-action="delete" />
+    <set-query-parameter name="subscription-key" exists-action="delete" />
+    <set-header name="Authorization" exists-action="delete" />
+    <set-variable name="app-client-secret" value="{{foundry-app-client-secret}}" />
+    <choose>
+      <when condition="@((string)context.Variables[&quot;app-client-secret&quot;] == &quot;UNCONFIGURED&quot;)">
+        <return-response>
+          <set-status code="503" reason="Backend credential not configured" />
+          <set-header name="Content-Type" exists-action="override">
+            <value>application/json</value>
+          </set-header>
+          <set-body>{"error":{"code":"BackendCredentialNotConfigured","message":"Run the application credential configuration hook before using this API."}}</set-body>
+        </return-response>
+      </when>
+    </choose>
+    <send-request mode="new" response-variable-name="app-token-response" timeout="20" ignore-error="false">
+      <set-url>https://login.microsoftonline.com/__TENANT_ID__/oauth2/v2.0/token</set-url>
+      <set-method>POST</set-method>
+      <set-header name="Content-Type" exists-action="override">
+        <value>application/x-www-form-urlencoded</value>
+      </set-header>
+      <set-body>@{
+        return "grant_type=client_credentials"
+          + "&amp;client_id=" + System.Net.WebUtility.UrlEncode("__APP_CLIENT_ID__")
+          + "&amp;client_secret=" + System.Net.WebUtility.UrlEncode((string)context.Variables["app-client-secret"])
+          + "&amp;scope=" + System.Net.WebUtility.UrlEncode("https://ai.azure.com/.default");
+      }</set-body>
+    </send-request>
+    <choose>
+      <when condition="@(((IResponse)context.Variables[&quot;app-token-response&quot;]).StatusCode != 200)">
+        <return-response>
+          <set-status code="502" reason="Foundry application token acquisition failed" />
+          <set-header name="Content-Type" exists-action="override">
+            <value>application/json</value>
+          </set-header>
+          <set-body>{"error":{"code":"FoundryApplicationTokenFailed","message":"Check the backend application credential, its expiry, and the tenant configuration."}}</set-body>
+        </return-response>
+      </when>
+    </choose>
+    <set-header name="Authorization" exists-action="override">
+      <value>@("Bearer " + ((IResponse)context.Variables["app-token-response"]).Body.As&lt;Newtonsoft.Json.Linq.JObject&gt;()["access_token"].ToString())</value>
+    </set-header>
+    <send-request mode="copy" response-variable-name="toolbox-response" timeout="120" ignore-error="false">
+      <set-url>__TOOLBOX_MCP_URL__</set-url>
+      <set-body>@(context.Request.Body.As&lt;string&gt;(preserveContent: true))</set-body>
+    </send-request>
+    <return-response response-variable-name="toolbox-response" />
+  </inbound>
+  <backend>
+    <base />
+  </backend>
+  <outbound>
+    <base />
+  </outbound>
+  <on-error>
+    <base />
+  </on-error>
+</policies>
