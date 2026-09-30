@@ -12,6 +12,7 @@ reference guides only for lower-level testing or temporary token-based access.
 |---|---|
 | VS Code and GitHub Copilot CLI with browser sign-in | [APIM OAuth gateway](1-apim-toolbox/) |
 | VS Code only, using the Azure Resources sign-in | [VS Code authentication extension](2-vscode-extension/) |
+| API-key clients, with Foundry access under APIM's identity | [APIM API key and managed identity](3-apim-api-key/) |
 | Endpoint diagnostics or automation | [Direct Azure CLI and REST calls](references/direct-toolbox/) |
 | Short-lived manual client test | [Manual token reference](references/manual-token/) |
 
@@ -40,6 +41,16 @@ GitHub authorization URLs.
 
 Use this sample when only VS Code is required and you do not want to deploy an
 APIM gateway or register a separate Entra client application.
+
+### 3. APIM API key and managed identity
+
+[`3-apim-api-key/`](3-apim-api-key/) deploys a separate gateway and Toolbox with
+Microsoft Learn. Clients provide an APIM subscription key; APIM uses its own
+managed identity and project-scoped Foundry User role for backend access.
+There is no per-user OAuth, OBO, or GitHub consent in this sample.
+
+Use this approach only when consumers should share the gateway's backend
+identity and permissions rather than retain their individual Foundry identity.
 
 ## Reference methods
 

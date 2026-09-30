@@ -1,0 +1,24 @@
+<policies>
+  <inbound>
+    <base />
+    <set-header name="Ocp-Apim-Subscription-Key" exists-action="delete" />
+    <set-query-parameter name="subscription-key" exists-action="delete" />
+    <set-header name="Authorization" exists-action="delete" />
+    <authentication-managed-identity resource="https://ai.azure.com" ignore-error="false" />
+    <!-- Forward JSON-RPC explicitly instead of using APIM's generated MCP tool catalog. -->
+    <send-request mode="copy" response-variable-name="toolbox-response" timeout="120" ignore-error="false">
+      <set-url>__FOUNDRY_ORIGIN____TOOLBOX_PATH__?api-version=v1</set-url>
+      <set-body>@(context.Request.Body.As&lt;string&gt;(preserveContent: true))</set-body>
+    </send-request>
+    <return-response response-variable-name="toolbox-response" />
+  </inbound>
+  <backend>
+    <base />
+  </backend>
+  <outbound>
+    <base />
+  </outbound>
+  <on-error>
+    <base />
+  </on-error>
+</policies>
