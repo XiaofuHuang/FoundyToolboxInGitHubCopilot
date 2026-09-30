@@ -1,0 +1,19 @@
+{
+  "inputs": [
+    {
+      "id": "foundryToolboxApimKey",
+      "type": "promptString",
+      "description": "APIM subscription key for the Foundry Toolbox",
+      "password": true
+    }
+  ],
+  "servers": {
+    "foundry-toolbox-api-key": {
+      "type": "http",
+      "url": "<APIM_TOOLBOX_MCP_URL>",
+      "headers": {
+        "Ocp-Apim-Subscription-Key": "${input:foundryToolboxApimKey}"
+      }
+    }
+  }
+}

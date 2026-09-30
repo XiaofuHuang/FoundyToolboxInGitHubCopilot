@@ -12,6 +12,7 @@ Toolbox 的实用方式。请从带编号的示例开始；仅在进行底层测
 |---|---|
 | VS Code 和 GitHub Copilot CLI 使用浏览器登录 | [APIM OAuth 网关](1-apim-toolbox/README.zh-CN.md) |
 | 仅使用 VS Code，并复用 Azure Resources 登录 | [VS Code 身份验证扩展](2-vscode-extension/README.zh-CN.md) |
+| 客户端使用 API key，APIM 以自己的身份访问 Foundry | [APIM API key 与 managed identity](3-apim-api-key/README.zh-CN.md) |
 | 终结点诊断或自动化 | [直接使用 Azure CLI 和 REST 调用](references/direct-toolbox/README.zh-CN.md) |
 | 使用短期令牌手动测试客户端 | [手动令牌参考指南](references/manual-token/README.zh-CN.md) |
 
@@ -38,6 +39,16 @@ Toolbox 体验，请选择此示例。
 
 如果只需要 VS Code，并且不希望部署 APIM 网关或单独注册 Entra 客户端应用，
 请选择此示例。
+
+### 3. APIM API key 与 managed identity
+
+[`3-apim-api-key/`](3-apim-api-key/README.zh-CN.md) 会部署独立的网关和包含
+Microsoft Learn 的 Toolbox。客户端提供 APIM subscription key，APIM 使用
+自己的 managed identity 和项目级 Foundry User 角色访问后端。
+本示例不使用 per-user OAuth、OBO 或 GitHub consent。
+
+仅在使用者应共享网关的后端身份和权限，而不是保留各自的 Foundry 用户身份时，
+选择这种方式。
 
 ## 参考方式
 
