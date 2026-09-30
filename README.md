@@ -12,6 +12,7 @@ reference guides only for lower-level testing or temporary token-based access.
 |---|---|
 | VS Code and GitHub Copilot CLI with browser sign-in | [APIM OAuth gateway](1-apim-toolbox/) |
 | VS Code only, using the Azure Resources sign-in | [VS Code authentication extension](2-vscode-extension/) |
+| APIM subscription key for clients, dedicated Entra application for the backend | [API-key gateway with application authentication](4-apim-entra-app/) |
 | Endpoint diagnostics or automation | [Direct Azure CLI and REST calls](references/direct-toolbox/) |
 | Short-lived manual client test | [Manual token reference](references/manual-token/) |
 
@@ -40,6 +41,18 @@ GitHub authorization URLs.
 
 Use this sample when only VS Code is required and you do not want to deploy an
 APIM gateway or register a separate Entra client application.
+
+### 4. API-key gateway with an Entra application
+
+[`4-apim-entra-app/`](4-apim-entra-app/) is a standalone Microsoft Learn-only
+sample. Clients send an API-scoped APIM subscription key; APIM obtains a Foundry
+token using a dedicated Entra application's `client_credentials` grant and a
+short-lived secret stored in an APIM secret named value. APIM has no managed
+identity, performs no OBO, and grants no per-user backend access.
+
+It provisions separate billable APIM Basic v2 and Foundry resources. Choose this
+sample when a shared application identity is appropriate and you can operate
+the documented secret-rotation lifecycle.
 
 ## Reference methods
 
